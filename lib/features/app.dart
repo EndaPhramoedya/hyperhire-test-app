@@ -13,7 +13,7 @@ class App extends StatelessWidget {
       initialRoute: RoutePaths.home,
       onGenerateRoute: _onGenerateRoute,
       theme: ThemeData(
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: Color(0xffF8F8F8),
       ),
     );
   }

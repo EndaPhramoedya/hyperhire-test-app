@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:hyperhire_test_app/features/home/model/product_model.dart';
+import 'package:hyperhire_test_app/features/home/model/user_model.dart';
 
 part 'home_bloc.freezed.dart';
 part 'home_event.dart';
@@ -10,6 +11,7 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
   HomeBloc() : super(const HomeState()) {
     on<_GetBannerList>(_onGetBannerList);
     on<_GetTop3ProductList>(_onGetTop3ProductList);
+    on<_GetTop10ReviewerList>(_onGetTop10ReviewerList);
   }
 
   void _onGetBannerList(_GetBannerList event, Emitter<HomeState> emit) {
@@ -66,5 +68,19 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
       ),
     ];
     emit(state.copyWith(top3ProductList: productList));
+  }
+
+  void _onGetTop10ReviewerList(_GetTop10ReviewerList event, Emitter<HomeState> emit) {
+    final int length = 10;
+    final List<UserModel> reviewerList = List.generate(length, (index) {
+      final int idx = index + 1;
+      return UserModel(
+        name: 'Name${index != length - 1 ? '0$idx' : '$idx'}',
+        image: 'user$idx',
+        isTopRank: index == 0 ? true : false,
+      );
+    });
+
+    emit(state.copyWith(top10ReviewerList: reviewerList));
   }
 }

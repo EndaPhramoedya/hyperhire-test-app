@@ -4,7 +4,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:gradient_borders/input_borders/gradient_outline_input_border.dart';
 import 'package:hyperhire_test_app/features/home/bloc/home_bloc.dart';
 import 'package:hyperhire_test_app/features/home/model/product_model.dart';
+import 'package:hyperhire_test_app/features/home/model/user_model.dart';
 import 'package:hyperhire_test_app/features/home/widget/product_card.dart';
+import 'package:hyperhire_test_app/features/home/widget/reviewer_card.dart';
 import 'package:hyperhire_test_app/utils/image_helper.dart';
 
 class HomePage extends StatefulWidget {
@@ -19,7 +21,8 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     context.read<HomeBloc>()
       ..add(const HomeEvent.getBannerList())
-      ..add(const HomeEvent.getTop3ProductList());
+      ..add(const HomeEvent.getTop3ProductList())
+      ..add(const HomeEvent.getTop10ReviewerList());
 
     super.initState();
   }
@@ -38,6 +41,7 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
         child: AppBar(
+          backgroundColor: Colors.white,
           elevation: 0.0,
           centerTitle: false,
           title: Text(
@@ -56,62 +60,66 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHeaderSection() {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16),
-          child: const TextField(
-            decoration: InputDecoration(
-              labelText: '검색어를 입력하세요',
-              enabledBorder: GradientOutlineInputBorder(
-                gradient: LinearGradient(colors: [Color(0xff3C41BF), Color(0xff74FBDE)]),
-                width: 2,
-                borderRadius: BorderRadius.all(Radius.circular(15)),
+    return ColoredBox(
+      color: Colors.white,
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: const TextField(
+              decoration: InputDecoration(
+                labelText: '검색어를 입력하세요',
+                enabledBorder: GradientOutlineInputBorder(
+                  gradient: LinearGradient(colors: [Color(0xff3C41BF), Color(0xff74FBDE)]),
+                  width: 2,
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                ),
+                focusedBorder: GradientOutlineInputBorder(
+                  gradient: LinearGradient(colors: [Color(0xff3C41BF), Color(0xff74FBDE)]),
+                  width: 2,
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
+                ),
+                suffixIcon: Icon(Icons.search),
               ),
-              focusedBorder: GradientOutlineInputBorder(
-                gradient: LinearGradient(colors: [Color(0xff3C41BF), Color(0xff74FBDE)]),
-                width: 2,
-                borderRadius: BorderRadius.all(Radius.circular(15)),
-              ),
-              suffixIcon: Icon(Icons.search),
             ),
           ),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-        BlocBuilder<HomeBloc, HomeState>(
-          buildWhen: (prev, curr) => prev.bannerList != curr.bannerList,
-          builder: (context, state) {
-            final List<String> bannerList = state.bannerList;
-            if (bannerList.isEmpty) {
-              return const SizedBox();
-            }
+          const SizedBox(
+            height: 10,
+          ),
+          BlocBuilder<HomeBloc, HomeState>(
+            buildWhen: (prev, curr) => prev.bannerList != curr.bannerList,
+            builder: (context, state) {
+              final List<String> bannerList = state.bannerList;
+              if (bannerList.isEmpty) {
+                return const SizedBox();
+              }
 
-            return ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 200),
-              child: CarouselView(
-                backgroundColor: Colors.transparent,
-                itemExtent: 300,
-                padding: EdgeInsets.zero,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(0),
+              return ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 200),
+                child: CarouselView(
+                  backgroundColor: Colors.transparent,
+                  itemExtent: 300,
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                  children: List.generate(
+                    bannerList.length,
+                    (index) => Image.asset(ImageHelper.getSourceByPng(bannerList[index])),
+                  ),
                 ),
-                children: List.generate(
-                  bannerList.length,
-                  (index) => Image.asset(ImageHelper.getSourceByPng(bannerList[index])),
-                ),
-              ),
-            );
-          },
-        ),
-      ],
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 
-  Widget _buildTop3Section() {
+  Widget _buildTop3ProductSection() {
     return Flexible(
-      child: Padding(
+      child: Container(
+        color: Colors.white,
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
@@ -149,7 +157,9 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            const SizedBox(height: 15,),
+            const SizedBox(
+              height: 15,
+            ),
             BlocBuilder<HomeBloc, HomeState>(
               buildWhen: (prev, curr) => prev.top3ProductList != curr.top3ProductList,
               builder: (context, state) {
@@ -172,14 +182,91 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget _buildContent() {
-    return SingleChildScrollView(
+  Widget _buildTop10UserSection() {
+    return ColoredBox(
+      color: Colors.white,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildHeaderSection(),
-          _buildTop3Section(),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '골드 계급 사용자들이예요',
+                  style: GoogleFonts.notoSansKr(
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w400,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+                Text(
+                  '베스트 리뷰어 🏆 Top10',
+                  style: GoogleFonts.notoSansKr(
+                    textStyle: const TextStyle(
+                      fontWeight: FontWeight.w500,
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(
+            height: 18,
+          ),
+          BlocBuilder<HomeBloc, HomeState>(
+            buildWhen: (prev, curr) => prev.top10ReviewerList != curr.top10ReviewerList,
+            builder: (context, state) {
+              final List<UserModel> reviewerList = state.top10ReviewerList;
+              if (reviewerList.isEmpty) {
+                return const SizedBox();
+              }
+
+              return ConstrainedBox(
+                constraints: const BoxConstraints(maxHeight: 120),
+                child: CarouselView(
+                  backgroundColor: Colors.transparent,
+                  itemExtent: 100,
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                  children: List.generate(
+                    reviewerList.length,
+                    (index) => GestureDetector(
+                      onTap: () {},
+                      child: ReviewerCard(
+                        user: reviewerList[index],
+                      ),
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildContent() {
+    return SafeArea(
+      child: SingleChildScrollView(
+        physics: const ClampingScrollPhysics(),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildHeaderSection(),
+            _buildTop3ProductSection(),
+            const SizedBox(
+              height: 10,
+            ),
+            _buildTop10UserSection(),
+          ],
+        ),
       ),
     );
   }
